@@ -1,9 +1,6 @@
-# Binary
-godoceasy
-godoceasy.exe
-
-# Compiled binary
+# Compiled binary (root only)
 /godoceasy
+/godoceasy.exe
 
 # OS files
 .DS_Store
