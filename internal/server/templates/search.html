@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .Title }}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <header class="top-nav">
+        <div class="nav-left">
+            <a href="/" class="logo">
+                <span class="logo-icon">📘</span>
+                <span class="logo-text">godoceasy</span>
+            </a>
+            <span class="pkg-path">{{ .PackagePath }}</span>
+        </div>
+        <div class="nav-center">
+            <form action="/search" method="GET" class="search-form">
+                <input type="text" name="q" value="{{ .Query }}" placeholder="🔍 Search structs, functions, interfaces, types..." class="search-input" id="searchInput" autocomplete="off">
+                <button type="submit" class="search-btn">🔍</button>
+                <div id="searchDropdown" class="search-dropdown"></div>
+            </form>
+        </div>
+        <div class="nav-right">
+            <a href="/" class="nav-link">Home</a>
+        </div>
+    </header>
+
+    <div class="layout">
+        <!-- Left Sidebar -->
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">📦 Packages</h3>
+                    <ul class="sidebar-list">
+                        {{ range .Packages }}
+                        <li><a href="/pkg/{{ .PackageName }}">{{ .PackageName }}</a></li>
+                        {{ end }}
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <section class="doc-section">
+                <h1>🔍 Search Results for "{{ .Query }}"</h1>
+
+                {{ if .Results }}
+                <p class="results-count">Found {{ len .Results }} result(s)</p>
+
+                <div class="search-results">
+                    {{ range .Results }}
+                    <a href="/pkg/{{ .Package }}#{{ .Anchor }}" class="search-result-card">
+                        <div class="result-header">
+                            <span class="result-name">{{ .Name }}</span>
+                            <span class="badge badge-{{ lower .Type }}">{{ .Type }}</span>
+                        </div>
+                        <p class="result-pkg">📦 {{ .Package }}</p>
+                        {{ if .Description }}
+                        <p class="result-desc">{{ .Description }}</p>
+                        {{ end }}
+                    </a>
+                    {{ end }}
+                </div>
+                {{ else }}
+                <div class="empty-state">
+                    <p>No results found for "{{ .Query }}".</p>
+                    <p>Try searching for function names, struct names, or keywords.</p>
+                </div>
+                {{ end }}
+            </section>
+        </main>
+    </div>
+
+    <script src="/static/js/search.js"></script>
+</body>
+</html>
+

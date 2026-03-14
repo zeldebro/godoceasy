@@ -1,0 +1,23 @@
+# Binary
+godoceasy
+godoceasy.exe
+
+# Compiled binary
+/godoceasy
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Test artifacts
+/tmp/
+*.test
+*.out
+
