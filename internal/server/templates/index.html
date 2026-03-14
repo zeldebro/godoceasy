@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .Title }}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <header class="top-nav">
+        <div class="nav-left">
+            <a href="/" class="logo">
+                <span class="logo-icon">📘</span>
+                <span class="logo-text">godoceasy</span>
+            </a>
+            <span class="pkg-path">{{ .PackagePath }}</span>
+        </div>
+        <div class="nav-center">
+            <form action="/search" method="GET" class="search-form">
+                <input type="text" name="q" placeholder="🔍 Search structs, functions, interfaces, types..." class="search-input" id="searchInput" autocomplete="off">
+                <button type="submit" class="search-btn">🔍</button>
+                <div id="searchDropdown" class="search-dropdown"></div>
+            </form>
+        </div>
+        <div class="nav-right">
+            <a href="https://pkg.go.dev/{{ .PackagePath }}" target="_blank" class="nav-link">pkg.go.dev ↗</a>
+        </div>
+    </header>
+
+    <div class="layout">
+        <!-- Left Sidebar -->
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">📦 Packages</h3>
+                    <ul class="sidebar-list">
+                        {{ range .Packages }}
+                        <li><a href="/pkg/{{ .PackageName }}">{{ .PackageName }}</a></li>
+                        {{ end }}
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <div class="welcome-banner">
+                <h1>📘 godoceasy</h1>
+                <p class="subtitle">Learn Any Go Package — Without Reading Source Code</p>
+                <p class="description">Search inside any package for structs, functions, interfaces & types. Every item explained with "What It Does", "When To Use", "In Simple Words" + copy-paste examples.</p>
+                <p class="description" style="margin-top:8px;font-size:0.85em;opacity:0.7">Press <kbd style="background:rgba(255,255,255,0.2);padding:2px 6px;border-radius:4px">/</kbd> to search</p>
+            </div>
+
+            <div class="package-grid">
+                {{ range .Packages }}
+                <a href="/pkg/{{ .PackageName }}" class="package-card">
+                    <div class="card-header">
+                        <span class="card-icon">📦</span>
+                        <h2>{{ .PackageName }}</h2>
+                    </div>
+                    <div class="card-desc">{{ safeHTML .Overview }}</div>
+                    <div class="card-stats">
+                        {{ if .Structs }}<span class="stat">📐 {{ len .Structs }} Structs</span>{{ end }}
+                        {{ if .Interfaces }}<span class="stat">🔌 {{ len .Interfaces }} Interfaces</span>{{ end }}
+                        {{ if .Functions }}<span class="stat">⚡ {{ len .Functions }} Functions</span>{{ end }}
+                        {{ if .Types }}<span class="stat">🏷️ {{ len .Types }} Types</span>{{ end }}
+                    </div>
+                </a>
+                {{ end }}
+            </div>
+
+            {{ if not .Packages }}
+            <div class="empty-state">
+                <p>No packages found. Try fetching a different Go module.</p>
+            </div>
+            {{ end }}
+
+            <!-- Master Package Structure Diagram -->
+            {{ if .Packages }}
+            <div class="diagram-section">
+                <h3>🗺️ Master Package Map</h3>
+                <p class="diagram-hint">Overview of all packages — click any to view full documentation</p>
+                <div id="masterDiagram" class="diagram-container" data-package="__all__" data-base="{{ .PackagePath }}"></div>
+            </div>
+            {{ end }}
+
+            <!-- Popular packages suggestion -->
+            <div class="popular-section">
+                <h2 class="section-title">🚀 Popular Go Libraries</h2>
+                <p class="popular-hint">Run any of these from your terminal:</p>
+                <div class="popular-grid">
+                    <div class="popular-card">
+                        <span class="popular-icon">🌐</span>
+                        <div>
+                            <strong>gin-gonic/gin</strong>
+                            <p>HTTP web framework</p>
+                            <code>godoceasy github.com/gin-gonic/gin</code>
+                        </div>
+                    </div>
+                    <div class="popular-card">
+                        <span class="popular-icon">☸️</span>
+                        <div>
+                            <strong>k8s.io/client-go</strong>
+                            <p>Kubernetes Go client</p>
+                            <code>godoceasy k8s.io/client-go</code>
+                        </div>
+                    </div>
+                    <div class="popular-card">
+                        <span class="popular-icon">🐍</span>
+                        <div>
+                            <strong>spf13/cobra</strong>
+                            <p>CLI framework</p>
+                            <code>godoceasy github.com/spf13/cobra</code>
+                        </div>
+                    </div>
+                    <div class="popular-card">
+                        <span class="popular-icon">📋</span>
+                        <div>
+                            <strong>sirupsen/logrus</strong>
+                            <p>Structured logger</p>
+                            <code>godoceasy github.com/sirupsen/logrus</code>
+                        </div>
+                    </div>
+                    <div class="popular-card">
+                        <span class="popular-icon">⚡</span>
+                        <div>
+                            <strong>go.uber.org/zap</strong>
+                            <p>Fast structured logger</p>
+                            <code>godoceasy go.uber.org/zap</code>
+                        </div>
+                    </div>
+                    <div class="popular-card">
+                        <span class="popular-icon">🧪</span>
+                        <div>
+                            <strong>stretchr/testify</strong>
+                            <p>Testing toolkit</p>
+                            <code>godoceasy github.com/stretchr/testify</code>
+                        </div>
+                    </div>
+                    <div class="popular-card">
+                        <span class="popular-icon">📦</span>
+                        <div>
+                            <strong>Standard Library</strong>
+                            <p>fmt, net/http, encoding/json</p>
+                            <code>godoceasy fmt</code>
+                        </div>
+                    </div>
+                    <div class="popular-card">
+                        <span class="popular-icon">🔧</span>
+                        <div>
+                            <strong>spf13/viper</strong>
+                            <p>Configuration management</p>
+                            <code>godoceasy github.com/spf13/viper</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/search.js"></script>
+</body>
+</html>
+

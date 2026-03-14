@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .Title }}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <header class="top-nav">
+        <div class="nav-left">
+            <a href="/" class="logo">
+                <span class="logo-icon">📘</span>
+                <span class="logo-text">godoceasy</span>
+            </a>
+            <span class="pkg-path">{{ .PackagePath }}</span>
+        </div>
+        <div class="nav-center">
+            <form action="/search" method="GET" class="search-form">
+                <input type="text" name="q" placeholder="🔍 Search structs, functions, interfaces, types..." class="search-input" id="searchInput" autocomplete="off">
+                <button type="submit" class="search-btn">🔍</button>
+                <div id="searchDropdown" class="search-dropdown"></div>
+            </form>
+        </div>
+        <div class="nav-right">
+            <a href="/" class="nav-link">Home</a>
+            <a href="https://pkg.go.dev/{{ .PackagePath }}" target="_blank" class="nav-link">pkg.go.dev ↗</a>
+        </div>
+    </header>
+
+    <div class="layout">
+        <!-- Left Sidebar -->
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <!-- Package Navigation -->
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">📦 Packages</h3>
+                    <ul class="sidebar-list">
+                        {{ range .Packages }}
+                        <li><a href="/pkg/{{ .PackageName }}" {{ if eq .PackageName $.Package.PackageName }}class="active"{{ end }}>{{ .PackageName }}</a></li>
+                        {{ end }}
+                    </ul>
+                </div>
+
+                <!-- Current Package Navigation -->
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">📑 This Package</h3>
+                    <ul class="sidebar-list">
+                        <li><a href="#overview">Overview</a></li>
+                        {{ if .Package.Structs }}
+                        <li>
+                            <a href="#structs">📐 Structs</a>
+                            <ul class="sidebar-sublist">
+                                {{ range .Package.Structs }}
+                                <li><a href="#struct-{{ .Name }}">{{ .Name }}</a></li>
+                                {{ end }}
+                            </ul>
+                        </li>
+                        {{ end }}
+                        {{ if .Package.Interfaces }}
+                        <li>
+                            <a href="#interfaces">🔌 Interfaces</a>
+                            <ul class="sidebar-sublist">
+                                {{ range .Package.Interfaces }}
+                                <li><a href="#interface-{{ .Name }}">{{ .Name }}</a></li>
+                                {{ end }}
+                            </ul>
+                        </li>
+                        {{ end }}
+                        {{ if .Package.Functions }}
+                        <li>
+                            <a href="#functions">⚡ Functions</a>
+                            <ul class="sidebar-sublist">
+                                {{ range .Package.Functions }}
+                                <li><a href="#func-{{ .Name }}">{{ .Name }}</a></li>
+                                {{ end }}
+                            </ul>
+                        </li>
+                        {{ end }}
+                        {{ if .Package.Types }}
+                        <li><a href="#types">🏷️ Types</a></li>
+                        {{ end }}
+                        {{ if .Package.Constants }}
+                        <li><a href="#constants">📌 Constants</a></li>
+                        {{ end }}
+                        {{ if .Package.Variables }}
+                        <li><a href="#variables">📎 Variables</a></li>
+                        {{ end }}
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <!-- Package Overview -->
+            <section id="overview" class="doc-section">
+                <div class="section-header">
+                    <h1>📦 Package {{ .Package.PackageName }}</h1>
+                    <code class="import-path">import "{{ .Package.ImportPath }}"</code>
+                </div>
+
+                <div class="info-box overview-box">
+                    <h3>📋 Overview</h3>
+                    <div>{{ safeHTML .Package.Overview }}</div>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-box what-box">
+                        <h3>🎯 What It Does</h3>
+                        <div>{{ safeHTML .Package.WhatItDoes }}</div>
+                    </div>
+                    <div class="info-box when-box">
+                        <h3>⏰ When To Use</h3>
+                        <div>{{ safeHTML .Package.WhenToUse }}</div>
+                    </div>
+                </div>
+
+                {{ if .Package.Files }}
+                <div class="info-box files-box">
+                    <h3>📁 Files</h3>
+                    <div class="file-list">
+                        {{ range .Package.Files }}
+                        <span class="file-tag">{{ . }}</span>
+                        {{ end }}
+                    </div>
+                </div>
+                {{ end }}
+
+                <!-- Package Structure Diagram -->
+                <div class="diagram-section">
+                    <h3>🗺️ Package Structure Map</h3>
+                    <p class="diagram-hint">Interactive diagram — click any item to jump to its documentation</p>
+                    <div id="packageDiagram" class="diagram-container" data-package="{{ .Package.PackageName }}"></div>
+                </div>
+            </section>
+
+            <!-- Structs -->
+            {{ if .Package.Structs }}
+            <section id="structs" class="doc-section">
+                <h2 class="section-title">📐 Structs</h2>
+
+                {{ range .Package.Structs }}
+                <div id="struct-{{ .Name }}" class="doc-item">
+                    <div class="item-header">
+                        <h3>{{ .Name }}</h3>
+                        <span class="badge badge-struct">Struct</span>
+                    </div>
+
+                    <div class="info-grid">
+                        <div class="info-box what-box">
+                            <h4>🎯 What It Does</h4>
+                            <div>{{ safeHTML .WhatItDoes }}</div>
+                        </div>
+                        <div class="info-box when-box">
+                            <h4>⏰ When To Use</h4>
+                            <div>{{ safeHTML .WhenToUse }}</div>
+                        </div>
+                    </div>
+
+                    {{ if hasContent .Explanation }}
+                    <div class="info-box simple-box">
+                        <h4>💬 In Simple Words</h4>
+                        <div>{{ safeHTML .Explanation }}</div>
+                    </div>
+                    {{ end }}
+
+                    {{ if .Fields }}
+                    <div class="fields-table">
+                        <h4>📋 Fields</h4>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{ range .Fields }}
+                                <tr>
+                                    <td><code>{{ .Name }}</code></td>
+                                    <td><code>{{ .Type }}</code></td>
+                                    <td>{{ safeHTML .Description }}</td>
+                                </tr>
+                                {{ end }}
+                            </tbody>
+                        </table>
+                    </div>
+                    {{ end }}
+
+                    {{ if hasContent .Example }}
+                    <div class="example-box">
+                        <div class="example-header">
+                            <h4>💡 Copy-Paste Example</h4>
+                            <button class="copy-btn" onclick="copyCode(this)" title="Copy to clipboard">📋 Copy</button>
+                        </div>
+                        <pre><code>{{ .Example }}</code></pre>
+                    </div>
+                    {{ end }}
+
+                    {{ if .Methods }}
+                    <div class="methods-section">
+                        <h4>🔧 Methods</h4>
+                        {{ range .Methods }}
+                        <div id="method-{{ $.Name }}-{{ .Name }}" class="method-item">
+                            <h5>{{ .Name }}</h5>
+                            <pre class="signature"><code>{{ .Signature }}</code></pre>
+                            <div>{{ safeHTML .WhatItDoes }}</div>
+                            {{ if hasContent .Explanation }}
+                            <div class="method-simple-words">💬 {{ .Explanation }}</div>
+                            {{ end }}
+                            {{ if .Params }}
+                            <div class="params">
+                                <strong>Parameters:</strong>
+                                <ul>
+                                    {{ range .Params }}
+                                    <li>{{ safeHTML .Description }}</li>
+                                    {{ end }}
+                                </ul>
+                            </div>
+                            {{ end }}
+                            {{ if hasContent .Example }}
+                            <div class="example-box small">
+                                <button class="copy-btn copy-btn-sm" onclick="copyCode(this)" title="Copy to clipboard">📋</button>
+                                <pre><code>{{ .Example }}</code></pre>
+                            </div>
+                            {{ end }}
+                        </div>
+                        {{ end }}
+                    </div>
+                    {{ end }}
+                </div>
+                {{ end }}
+            </section>
+            {{ end }}
+
+            <!-- Interfaces -->
+            {{ if .Package.Interfaces }}
+            <section id="interfaces" class="doc-section">
+                <h2 class="section-title">🔌 Interfaces</h2>
+
+                {{ range .Package.Interfaces }}
+                <div id="interface-{{ .Name }}" class="doc-item">
+                    <div class="item-header">
+                        <h3>{{ .Name }}</h3>
+                        <span class="badge badge-interface">Interface</span>
+                    </div>
+
+                    <div class="info-grid">
+                        <div class="info-box what-box">
+                            <h4>🎯 What It Does</h4>
+                            <div>{{ safeHTML .WhatItDoes }}</div>
+                        </div>
+                        <div class="info-box when-box">
+                            <h4>⏰ When To Use</h4>
+                            <div>{{ safeHTML .WhenToUse }}</div>
+                        </div>
+                    </div>
+
+                    {{ if hasContent .Explanation }}
+                    <div class="info-box simple-box">
+                        <h4>💬 In Simple Words</h4>
+                        <div>{{ safeHTML .Explanation }}</div>
+                    </div>
+                    {{ end }}
+
+                    {{ if .Methods }}
+                    <div class="methods-section">
+                        <h4>🔧 Required Methods</h4>
+                        {{ range .Methods }}
+                        <div class="method-item">
+                            <h5>{{ .Name }}</h5>
+                            {{ if hasContent .Signature }}
+                            <pre class="signature"><code>{{ .Signature }}</code></pre>
+                            {{ end }}
+                            <div>{{ safeHTML .WhatItDoes }}</div>
+                        </div>
+                        {{ end }}
+                    </div>
+                    {{ end }}
+
+                    {{ if hasContent .Example }}
+                    <div class="example-box">
+                        <div class="example-header">
+                            <h4>💡 Copy-Paste Example</h4>
+                            <button class="copy-btn" onclick="copyCode(this)" title="Copy to clipboard">📋 Copy</button>
+                        </div>
+                        <pre><code>{{ .Example }}</code></pre>
+                    </div>
+                    {{ end }}
+                </div>
+                {{ end }}
+            </section>
+            {{ end }}
+
+            <!-- Functions -->
+            {{ if .Package.Functions }}
+            <section id="functions" class="doc-section">
+                <h2 class="section-title">⚡ Functions</h2>
+
+                {{ range .Package.Functions }}
+                <div id="func-{{ .Name }}" class="doc-item">
+                    <div class="item-header">
+                        <h3>{{ .Name }}</h3>
+                        <span class="badge badge-func">Function</span>
+                        {{ if .Receiver }}
+                        <span class="badge badge-method">Method of {{ .Receiver }}</span>
+                        {{ end }}
+                    </div>
+
+                    <pre class="signature"><code>{{ .Signature }}</code></pre>
+
+                    <div class="info-grid">
+                        <div class="info-box what-box">
+                            <h4>🎯 What It Does</h4>
+                            <div>{{ safeHTML .WhatItDoes }}</div>
+                        </div>
+                        <div class="info-box when-box">
+                            <h4>⏰ When To Use</h4>
+                            <div>{{ safeHTML .WhenToUse }}</div>
+                        </div>
+                    </div>
+
+                    {{ if hasContent .Explanation }}
+                    <div class="info-box simple-box">
+                        <h4>💬 In Simple Words</h4>
+                        <div>{{ .Explanation }}</div>
+                    </div>
+                    {{ end }}
+
+                    {{ if .Params }}
+                    <div class="params-table">
+                        <h4>📥 Parameters</h4>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{ range .Params }}
+                                <tr>
+                                    <td><code>{{ .Name }}</code></td>
+                                    <td><code>{{ .Type }}</code></td>
+                                    <td>{{ safeHTML .Description }}</td>
+                                </tr>
+                                {{ end }}
+                            </tbody>
+                        </table>
+                    </div>
+                    {{ end }}
+
+                    {{ if .Returns }}
+                    <div class="returns-section">
+                        <h4>📤 Returns</h4>
+                        <div class="return-types">
+                            {{ range .Returns }}
+                            <span class="return-tag"><code>{{ . }}</code></span>
+                            {{ end }}
+                        </div>
+                    </div>
+                    {{ end }}
+
+                    {{ if hasContent .Example }}
+                    <div class="example-box">
+                        <div class="example-header">
+                            <h4>💡 Copy-Paste Example</h4>
+                            <button class="copy-btn" onclick="copyCode(this)" title="Copy to clipboard">📋 Copy</button>
+                        </div>
+                        <pre><code>{{ .Example }}</code></pre>
+                    </div>
+                    {{ end }}
+                </div>
+                {{ end }}
+            </section>
+            {{ end }}
+
+            <!-- Types -->
+            {{ if .Package.Types }}
+            <section id="types" class="doc-section">
+                <h2 class="section-title">🏷️ Types</h2>
+
+                {{ range .Package.Types }}
+                <div id="type-{{ .Name }}" class="doc-item">
+                    <div class="item-header">
+                        <h3>{{ .Name }}</h3>
+                        <span class="badge badge-type">Type</span>
+                    </div>
+
+                    <pre class="signature"><code>type {{ .Name }} {{ .Underlying }}</code></pre>
+
+                    <div class="info-grid">
+                        <div class="info-box what-box">
+                            <h4>🎯 What It Does</h4>
+                            <div>{{ safeHTML .WhatItDoes }}</div>
+                        </div>
+                        <div class="info-box when-box">
+                            <h4>⏰ When To Use</h4>
+                            <div>{{ safeHTML .WhenToUse }}</div>
+                        </div>
+                    </div>
+
+                    {{ if hasContent .InSimpleWords }}
+                    <div class="info-box simple-box">
+                        <h4>💬 In Simple Words</h4>
+                        <div>{{ safeHTML .InSimpleWords }}</div>
+                    </div>
+                    {{ end }}
+
+                    {{ if hasContent .Example }}
+                    <div class="example-box">
+                        <div class="example-header">
+                            <h4>💡 Copy-Paste Example</h4>
+                            <button class="copy-btn" onclick="copyCode(this)" title="Copy to clipboard">📋 Copy</button>
+                        </div>
+                        <pre><code>{{ .Example }}</code></pre>
+                        {{ if hasContent .Explanation }}
+                        <div class="explanation">
+                            <strong>Explanation:</strong> {{ .Explanation }}
+                        </div>
+                        {{ end }}
+                    </div>
+                    {{ end }}
+                </div>
+                {{ end }}
+            </section>
+            {{ end }}
+
+            <!-- Constants -->
+            {{ if .Package.Constants }}
+            <section id="constants" class="doc-section">
+                <h2 class="section-title">📌 Constants</h2>
+                <table class="constants-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{ range .Package.Constants }}
+                        <tr>
+                            <td><code>{{ .Name }}</code></td>
+                            <td><code>{{ .Type }}</code></td>
+                            <td><code>{{ .Value }}</code></td>
+                            <td>{{ .Description }}</td>
+                        </tr>
+                        {{ end }}
+                    </tbody>
+                </table>
+            </section>
+            {{ end }}
+
+            <!-- Variables -->
+            {{ if .Package.Variables }}
+            <section id="variables" class="doc-section">
+                <h2 class="section-title">📎 Variables</h2>
+                <table class="variables-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{ range .Package.Variables }}
+                        <tr>
+                            <td><code>{{ .Name }}</code></td>
+                            <td><code>{{ .Type }}</code></td>
+                            <td>{{ .Description }}</td>
+                        </tr>
+                        {{ end }}
+                    </tbody>
+                </table>
+            </section>
+            {{ end }}
+        </main>
+    </div>
+
+    <script src="/static/js/search.js"></script>
+</body>
+</html>
+
